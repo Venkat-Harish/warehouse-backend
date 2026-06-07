@@ -21,7 +21,7 @@ app = FastAPI(
 # ── CORS ─────────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["flipkart-warehouse.vercel.app"],
+    allow_origins=["https://flipkart-warehouse.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
