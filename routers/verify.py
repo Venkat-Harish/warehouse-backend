@@ -127,12 +127,19 @@ def complete_verification(
     )
     return {"message": "Verification confirmed successfully"}
 
+from core.security import decode_access_token
+
 @router.get("/{activity_id}/photo")
 def get_activity_photo(
     activity_id: int,
+    token: str,
     db: Session = Depends(get_db),
-    user_id: int = Depends(get_current_user_id),
 ):
+    payload = decode_access_token(token)
+    if not payload or not payload.get("sub"):
+        raise HTTPException(status_code=401, detail="Invalid token")
+    user_id = int(payload.get("sub"))
+
     activity = db.get(VerificationActivity, activity_id)
     if not activity or activity.user_id != user_id:
         raise HTTPException(status_code=404, detail="Activity not found")
