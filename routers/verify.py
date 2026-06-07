@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, BackgroundTasks
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, BackgroundTasks, Response
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -127,6 +127,20 @@ def complete_verification(
     )
     return {"message": "Verification confirmed successfully"}
 
+@router.get("/{activity_id}/photo")
+def get_activity_photo(
+    activity_id: int,
+    db: Session = Depends(get_db),
+    user_id: int = Depends(get_current_user_id),
+):
+    activity = db.get(VerificationActivity, activity_id)
+    if not activity or activity.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    
+    if not activity.photo_data:
+        raise HTTPException(status_code=404, detail="No photo available")
+        
+    return Response(content=activity.photo_data, media_type=activity.photo_mime_type or "image/jpeg")
 
 @router.delete("/{activity_id}")
 def delete_verification(
